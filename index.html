@@ -270,13 +270,13 @@ Charlie
     </div>
 
     <div class="panel active" id="namesPanel">
-      <textarea id="names">
+<textarea id="names">
 Alice
 Bob
 Charlie
 David
 Emma
-      </textarea>
+</textarea>
       <button onclick="spin()">Spin</button>
     </div>
 
@@ -318,6 +318,8 @@ Emma
   <script>
     const canvas = document.getElementById("wheel");
     const ctx = canvas.getContext("2d");
+
+    let rigMode = false;
 
     canvas.addEventListener("click", () => {
       if (spinning) return;
@@ -387,13 +389,14 @@ Emma
         .map(v => v.trim())
         .filter(Boolean);
 
-      // 👉 if nothing entered = disable rigging
       if (raw.length === 0) {
         riggedOrder = null;
         remainingRigged = null;
+        rigMode = false;
       } else {
         riggedOrder = raw;
         remainingRigged = [...raw];
+        rigMode = true;
       }
 
       document.getElementById("rigModal").style.display = "none";
@@ -410,25 +413,25 @@ Emma
     }
 
     function getWildcardWinner(names) {
-      const remaining = names.filter(
-        n => !results.includes(n)
-      );
 
-      if (!remaining.length) {
-        return names[
-          Math.floor(Math.random() * names.length)
-        ];
+      let pool = names;
+
+      // ✅ ONLY enforce "no repeats" if rig mode is ON
+      if (rigMode) {
+        pool = names.filter(n => !results.includes(n));
       }
 
-      return remaining[
-        Math.floor(Math.random() * remaining.length)
-      ];
+      // if rig mode is ON but everything used
+      if (rigMode && pool.length === 0) {
+        pool = names;
+      }
+
+      return pool[Math.floor(Math.random() * pool.length)];
     }
 
     function getRiggedWinner(names) {
 
-      // 👉 NO RIG MODE → fully random fair selection
-      if (!remainingRigged || remainingRigged.length === 0) {
+      if (!rigMode || !remainingRigged || remainingRigged.length === 0) {
         return getWildcardWinner(names);
       }
 
@@ -442,7 +445,6 @@ Emma
         n => n.toLowerCase() === next.toLowerCase()
       );
 
-      // if invalid or already used → fallback random
       if (found && !results.includes(found)) {
         return found;
       }
