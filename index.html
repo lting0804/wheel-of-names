@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <link rel="icon" type="image/svg+xml"
+  href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%23ef4444'/%3E%3Cpath d='M50 50 L50 2 A48 48 0 0 1 93 28 Z' fill='%23f97316'/%3E%3Cpath d='M50 50 L93 28 A48 48 0 0 1 98 55 Z' fill='%23eab308'/%3E%3Cpath d='M50 50 L98 55 A48 48 0 0 1 85 85 Z' fill='%2322c55e'/%3E%3Cpath d='M50 50 L85 85 A48 48 0 0 1 55 98 Z' fill='%2306b6d4'/%3E%3Cpath d='M50 50 L55 98 A48 48 0 0 1 28 93 Z' fill='%233b82f6'/%3E%3Cpath d='M50 50 L28 93 A48 48 0 0 1 2 50 Z' fill='%238b5cf6'/%3E%3Cpath d='M50 50 L2 50 A48 48 0 0 1 50 2 Z' fill='%23ec4899'/%3E%3Ccircle cx='50' cy='50' r='18' fill='white'/%3E%3C/svg%3E">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Wheel of Names</title>
@@ -414,16 +416,24 @@ Emma
 
     function getWildcardWinner(names) {
 
-      let pool = names;
+      let blocked = new Set(results.map(n => n.toLowerCase()));
 
-      // ✅ ONLY enforce "no repeats" if rig mode is ON
-      if (rigMode) {
-        pool = names.filter(n => !results.includes(n));
+      // 👉 ALSO block rig queue items when rig mode is active
+      if (rigMode && remainingRigged) {
+        remainingRigged.forEach(n => {
+          if (n !== "*") {
+            blocked.add(n.toLowerCase());
+          }
+        });
       }
 
-      // if rig mode is ON but everything used
-      if (rigMode && pool.length === 0) {
-        pool = names;
+      const pool = names.filter(
+        n => !blocked.has(n.toLowerCase())
+      );
+
+      // fallback safety
+      if (pool.length === 0) {
+        return names[Math.floor(Math.random() * names.length)];
       }
 
       return pool[Math.floor(Math.random() * pool.length)];
