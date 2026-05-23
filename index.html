@@ -252,12 +252,12 @@ Bob
 *
 Charlie
 
-* = random remaining name not already selected"></textarea>
+* = random remaining name not already selected or in the rig list"></textarea>
 
       <div class="hint">
-        Enter the winner order.<br><br>
+        Enter an order of winners.<br><br>
         Wildcards (*) automatically choose a random name
-        that has NOT already appeared in Results.
+        that has NOT already appeared in Results or in the rig list.
       </div>
 
       <button onclick="saveRig()">Start</button>
@@ -270,6 +270,9 @@ Charlie
       <div class="tab active" onclick="switchTab('names')">Names</div>
       <div class="tab" onclick="switchTab('results')">Results</div>
     </div>
+    <button onclick="shuffleNames()" style="background:#6b7280; margin: 10px">
+      Shuffle Names
+    </button>
 
     <div class="panel active" id="namesPanel">
 <textarea id="names">
@@ -381,6 +384,26 @@ Emma
         .split("\n")
         .map(n => n.trim())
         .filter(Boolean);
+    }
+
+    function shuffleNames() {
+      const textarea = document.getElementById("names");
+
+      let names = textarea.value
+        .split("\n")
+        .map(n => n.trim())
+        .filter(Boolean);
+
+      // Fisher-Yates shuffle (proper random shuffle)
+      for (let i = names.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [names[i], names[j]] = [names[j], names[i]];
+      }
+
+      textarea.value = names.join("\n");
+
+      // redraw wheel immediately
+      drawWheel();
     }
 
     function saveRig() {
